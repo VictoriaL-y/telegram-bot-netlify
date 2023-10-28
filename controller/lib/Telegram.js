@@ -1,85 +1,6 @@
 const { axiosInstance } = require("./axios");
 const Ingredient = require("../../models/ingredient")
 
-let ingredientName = "";
-let waitingForIngredientName = false
-let waitingForIngredientWeight = false
-
-let measurements = {
-    flour: {
-        cup: {
-            "1": 120,
-            "3/4": 90,
-            "¾": 90,
-            "2/3": 80,
-            "⅔": 80,
-            "1/2": 60,
-            "½": 60,
-            "1/3": 40,
-            "⅓": 40,
-            "1/4": 30,
-            "¼": 30
-        },
-        tbsp: {
-            "1": 7.5
-        }
-    },
-    sugar: {
-        cup: {
-            "1": 200,
-        },
-        tbsp: {
-            "1": 12.5
-        }
-
-    },
-
-    "icing sugar": {
-        cup: {
-            "1": 100,
-        },
-        tbsp: {
-            "1": 6.5
-        }
-    },
-
-    "brown sugar": {
-        cup: {
-            "1": 180,
-        },
-        tbsp: {
-            "1": 11.5
-        }
-    },
-
-}
-
-// get all the ingredients from the database
-// function getIngredientsList() {
-//     Ingredient.find()
-//     .then((result) => {
-//         console.log(result[0].name + " is my result");
-//         // const resultStringified = JSON.stringify(result);
-//         let ingredientsList = ""
-//         console.log(result.length + " is length")
-
-//         for (let ingredient of result) {
-//             console.log(result.indexOf(ingredient) + " " + result)
-//             if (result.indexOf(ingredient) === result.length - 1) {
-//                 ingredientsList += ingredient.name;
-//             } else {
-//                 ingredientsList += ingredient.name + "\n";
-//             }
-//         }
-
-//         return ingredientsList;
-
-//     })
-//     .catch((err) => {
-//         console.log(err);
-//     });
-// }
-
 function sendMessage(messageObj, messageText) {
     return axiosInstance.get("sendMessage", {
         chat_id: messageObj.chat.id,
@@ -87,235 +8,324 @@ function sendMessage(messageObj, messageText) {
     });
 }
 
-function handleMessage(messageObj) {
+async function handleMessage(messageObj) {
     const messageText = messageObj.text || "";
+    let areThereUnknownIngredients = false;
 
-    if (messageText.charAt(0) === "/") {
+    if (!messageText) {
+        return sendMessage(messageObj, "I can't convert this");
+    } else if (messageText.charAt(0) === "/") {
         const command = messageText.substr(1);
         switch (command) {
             case "start":
-                waitingForIngredientName = false;
-                waitingForIngredientWeight = false;
                 // send a welcome message to the user
                 return sendMessage(
                     messageObj,
                     "Hi! I'm a bot who can help you to convert ingredients quantity from US measurements to EU"
                 );
             case "help":
-                waitingForIngredientName = false;
-                waitingForIngredientWeight = false;
                 // send an instruction message
                 return sendMessage(
                     messageObj,
-                    "Send me a list of ingredients to convert (tsp, tbs, cup -> grams). It should be a text."
+                    "Send me a list of ingredients to convert (tsp, tbsp, cup -> grams). It must be a text in column format.\n\nExample:\n1 cup salted butter softened\n1 cup granulated sugar\n1 cup light brown sugar packed\n2 teaspoons pure vanilla extract\n2 large eggs\n3 cups all-purpose flour\n1 teaspoon baking soda"
                 );
             case "all":
-                waitingForIngredientName = false;
-                waitingForIngredientWeight = false;
                 // get all the ingredients from the database
-                Ingredient.find()
-                    .then((result) => {
-                        let ingredientsList = ""
-                        console.log(result.length + " is length")
-
-                        for (let ingredient of result) {
-                            console.log(result.indexOf(ingredient) + " " + result)
-                            if (result.indexOf(ingredient) === result.length - 1) {
-                                ingredientsList += ingredient.name;
-                            } else {
-                                ingredientsList += ingredient.name + "\n";
-                            }
-                        }
-                        return sendMessage(
-                            messageObj, ingredientsList);
-
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
+                getAllIngredients(messageObj);
                 break;
             case "add":
-                // add new ingredient to the conversion table
-
-                waitingForIngredientName = true;
-                waitingForIngredientWeight = false;
-
+                // get a message how to add a new ingredient to the conversion table
                 return sendMessage(messageObj,
-                    "Which ingredient do you want to add to my table?");
+                    "Which ingredient do you want to add to my table? How many grams of it are in a US cup? Please write it in the following format:\n\n/add name weight");
 
+            case "add " + messageText.substr(5):
+                // add a new ingredient to the conversion table
+                addIngredient(messageObj, messageText);
+                break;
+
+            case "delete":
+                // get a message how to delete an existing ingredient from the conversion table
+                return sendMessage(messageObj,
+                    "Which ingredient do you want to delete from my table? Please write it in the following format:\n\n/delete name");
+
+            case "delete" + messageText.substr(7):
+                // delete an existing ingredient from the conversion table
+                deleteIngredient(messageObj, messageText);
+                break;
+
+            case "edit":
+                // get a message how to delete an existing ingredient from the conversion table
+                return sendMessage(messageObj,
+                    "For which ingredient do you want to adjust the weight? Please write it in the following format:\n\n/edit name weight");
+
+            case "edit" + messageText.substr(5):
+                // add a new ingredient to the conversion table
+                updateIngredient(messageObj, messageText);
+                break;
             default:
                 return sendMessage(messageObj,
                     "Hey, I don't know this command");
         }
-
-    } else if (!messageText) {
-        if (waitingForIngredientName) {
-            return sendMessage(messageObj, "Please type the name of the ingredient");
-        } else if (waitingForIngredientWeight) {
-            return sendMessage(messageObj, "Please type the weight of the ingredient");
-        }
-        return sendMessage(messageObj, "I can't convert this");
-    } else if (waitingForIngredientName) {
-        console.log("I'm here")
-        waitingForIngredientName = false;
-
-        Ingredient.find()
-            .then((result) => {
-
-                for (let ingredient of result) {
-                    if (ingredient.name === messageText) {
-                        return sendMessage(
-                            messageObj, "This ingredient is already in the table. You can just start to convert your ingredients");
-                    }
-                }
-
-                ingredientName = messageText;
-                waitingForIngredientWeight = true;
-                return sendMessage(
-                    messageObj, "How many grams of it are in a US cup?");
-            });
-
-    } else if (waitingForIngredientWeight) {
-        if (!isNaN(messageText)) {
-
-            const ingredient = new Ingredient({
-                name: ingredientName,
-                cup: messageText
-            });
-
-            ingredient.save()
-                .then(() => {
-                    return sendMessage(messageObj, "The ingredient <b>" + ingredientName + "</b> was successfully added!");
-                })
-                .catch((err) => {
-                    console.log(err);
-                })
-
-        } else {
-            return sendMessage(messageObj, "Please, indicate the weight in numbers");
-        }
     } else {
         //convert a recipe and send it back to the user
-        const recipe = getConvertedRecipe(messageText);
+        const recipe = await getConvertedRecipe(messageText);
+        console.log("I got the converted recipe");
 
-        console.log(recipe);
-        console.log(typeof (messageText));
+        if (areThereUnknownIngredients) {
+            console.log("An unknown ingredient")
+            return sendMessage(messageObj, "I could't find some ingredinets in my table, you should add them and try converting again.\n\n" + recipe);
+        }
         return sendMessage(messageObj, recipe);
     }
 }
 
-function getConvertedRecipe(messageText) {
-    console.log("higgg")
+function getAllIngredients(messageObj) {
+    Ingredient.find()
+        .then((result) => {
+            let ingredientsList = ""
+            console.log(result.length + " is length and the array of all the ingredients is: " + result);
+            for (let ingredient of result) {
+                if (result.indexOf(ingredient) === result.length - 1) {
+                    ingredientsList += ingredient.name;
+                } else {
+                    ingredientsList += ingredient.name + "\n";
+                }
+            }
+            return sendMessage(
+                messageObj, ingredientsList);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+}
+
+function addIngredient(messageObj, messageText) {
+
+    const ingredientArr = messageText.split(/\s/);
+    const ingredientWeigth = ingredientArr[ingredientArr.length - 1];
+    const ingredientName = messageText.replace("/add ", "").replace(" " + ingredientWeigth, "");
+
+    if (isNaN(ingredientWeigth)) {
+        return sendMessage(messageObj,
+            "Please try again, the weight is incorrect");
+    }
+    Ingredient.findOne({ name: ingredientName })
+        .then((result) => {
+            if (result) {
+                return sendMessage(
+                    messageObj, "This ingredient is already in the table.");
+            } else {
+                // save a new ingredient to the table
+                const ingredient = new Ingredient({
+                    name: ingredientName,
+                    cup: parseInt(ingredientWeigth)
+                });
+
+                ingredient.save()
+                    .then(() => {
+                        return sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully added!");
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    })
+            }
+        });
+}
+
+function deleteIngredient(messageObj, messageText) {
+    const ingredientName = messageText.substr(8);
+
+    Ingredient.findOneAndDelete({ name: ingredientName })
+        .then((result) => {
+            if (result) {
+                return sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully deleted!");
+            } else {
+                return sendMessage(
+                    messageObj, "This ingredient " + ingredientName + " doesn't exist in the table");
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+}
+
+function updateIngredient(messageObj, messageText) {
+    const ingredientArr = messageText.split(/\s/);
+    const ingredientWeigth = ingredientArr[ingredientArr.length - 1];
+    const ingredientName = messageText.replace("/edit ", "").replace(" " + ingredientWeigth, "");
+
+    if (isNaN(ingredientWeigth)) {
+        return sendMessage(messageObj,
+            "Please try again, the weight is incorrect");
+    } else {
+        Ingredient.findOneAndUpdate({ name: ingredientName }, { $set: { cup: parseInt(ingredientWeigth) } })
+            .then((result) => {
+                if (!result) {
+                    return sendMessage(
+                        messageObj, "This ingredient doesn't exist in the table");
+                } else {
+                    return sendMessage(messageObj, "The ingredient " + ingredientName + " now is " + ingredientWeigth + "gr for a cup!");
+                }
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+    }
+}
+
+async function getConvertedRecipe(messageText) {
+    console.log("I'm ready to convert a recipe");
     let recipeInGramsArr = [];
-    let amount;
     let newWeight;
     let oldWeight;
     const recipeArr = messageText.toLowerCase()
-        .replace("cups", "cup")
-        .replace("tablespoons", "tbsp")
-        .replace("tablespoon", "tbsp")
-        .replace("teaspoons", "tsp")
-        .replace("teaspoon", "tsp")
-        // .replace("⅔", "2/3")
-        // .replace("¾", "3/4")
-        // .replace("½", "1/2")
-        // .replace("⅓", "1/3")
-        // .replace("¼", "1/4")
+        .replaceAll("cups", "cup")
+        .replaceAll("tablespoons", "tbsp")
+        .replaceAll("tablespoon", "tbsp")
+        .replaceAll("teaspoons", "tsp")
+        .replaceAll("teaspoon", "tsp")
+        .replaceAll("⅔", "2/3")
+        .replaceAll("¾", "3/4")
+        .replaceAll("½", "1/2")
+        .replaceAll("⅓", "1/3")
+        .replaceAll("¼", "1/4")
         .split("\n") // get like [ '2 1/2 cup flour', '3 tbsp sugar' ]
     console.log(recipeArr)
 
     for (let ingredient of recipeArr) {
         let ingredientArr = ingredient.replace(/[&#,+()$~%.'":*?<>{}]/g, "").split(/\s/); // get like [ '2', '1/2', 'cup', 'flour' ]
+        let amount = ingredientArr[0];
         let ingredientArrWithSigns = ingredient.split(/\s/);
-        console.log(ingredient + " is an ingredient")
+        console.log(ingredient + " is a line from the list")
 
-        const [measurementContainer, indexOfContainer] = getMeasurementContainerAndIndex(ingredientArr);
+        const [measurementContainer, indexOfContainer, factor] = getMeasurementContainer(ingredientArr);
         if (indexOfContainer === -1) {
             recipeInGramsArr.push(ingredientArrWithSigns.join(" "));
             continue;
         }
-        const product = getProductName(ingredientArr);
-        if (product === false) {
+        const nameOfIngredient = await getProductName(ingredientArr, indexOfContainer);
+        if (nameOfIngredient === undefined) {
+            areThereUnknownIngredients = true;
             recipeInGramsArr.push(ingredientArrWithSigns.join(" "));
             continue;
         }
+        await Ingredient.findOne({ name: nameOfIngredient })
+            .then((result) => {
+                console.log(result.cup + " is a weight for a cup")
+                if (indexOfContainer === 1) {
+                    oldWeight = amount;
+                    if (ingredientArr[0].split('/').length === 1) { // if we have a whole number of cups/tbsp/tsp
+                        amount = parseInt(amount);
+                    } else {
+                        amount = parseInt(amount[0]) / parseInt(amount[2]);
+                    }
 
+                    newWeight = amount * result.cup / factor;
+                    console.log(newWeight + " is a converted weight for " + nameOfIngredient);
 
-        if (indexOfContainer === 1) {
-            amount = ingredientArr[0];
-            oldWeight = amount;
-            if (ingredientArr[0].split('/').length === 1) {
-                newWeight = parseInt(amount) * measurements[product][measurementContainer]["1"];
-            } else {
-                newWeight = measurements[product][measurementContainer][amount];
-            }
+                } else if (indexOfContainer === 2) {
+                    let amountFract = ingredientArr[1];
+                    oldWeight = amount + " " + amountFract;
+                    amount = parseInt(amount) + parseInt(amountFract[0]) / parseInt(amountFract[2]);
+                    newWeight = amount * result.cup / factor;
+                    console.log(newWeight + " is a convertedWeight for " + nameOfIngredient);
+                }
 
-        } else if (indexOfContainer === 2) {
-            let amountWhole = ingredientArr[0];
-            let amountFract = ingredientArr[1];
-            oldWeight = amountWhole + " " + amountFract;
-            newWeight = parseInt(amountWhole) * measurements[product][measurementContainer]["1"]
-                + measurements[product][measurementContainer][amountFract];
-        }
+                const convertedIngredient = ingredientArrWithSigns.join(' ')
+                    .replace(oldWeight, Math.round(newWeight * 10) / 10)
+                    .replace(measurementContainer, "gr");
+                recipeInGramsArr.push(convertedIngredient);
+                console.log(recipeInGramsArr);
 
-        const convertedIngredient = ingredientArrWithSigns.join(' ')
-            .replace(oldWeight, newWeight)
-            .replace(measurementContainer, "gr");
-        recipeInGramsArr.push(convertedIngredient);
-
-
+            }).catch((err) => {
+                console.log(err);
+            })
     }
     const recipe = recipeInGramsArr.join('\n');
-    // if (recipeInGramsArr.length === 0) {
-    //     return "I can't convert this recipe"
-    // }
     return recipe;
 }
 
-function getMeasurementContainerAndIndex(ingredientArr) {
+function getMeasurementContainer(ingredientArr) {
     let measurementContainer = "cup";
+    let factor = 1;
     let indexOfContainer = ingredientArr.indexOf("cup") // index of 'cup' is 2
-    console.log(ingredientArr[1])
 
     if (indexOfContainer < 0) {
         measurementContainer = "tbsp";
+        factor = 16; // there are 16tbsp in a cup
         indexOfContainer = ingredientArr.indexOf("tbsp");
         if (indexOfContainer < 0) {
+            factor = 48; // there are 48tsp in a cup
             measurementContainer = "tsp";
             indexOfContainer = ingredientArr.indexOf("tsp");
             if (indexOfContainer < 0) {
-                console.log(indexOfContainer + " is index " + measurementContainer)
+                console.log(indexOfContainer + " is index, the ingredient doesn't exist")
                 return ["no container", -1];
             }
         }
         console.log(measurementContainer + " has index " + indexOfContainer)
     }
-    return [measurementContainer, indexOfContainer];
+    return [measurementContainer, indexOfContainer, factor];
 }
 
-function getProductName(ingredientArr) {
+async function getProductName(ingredientArr, indexOfContainer) {
     console.log(ingredientArr)
-    if (ingredientArr.includes('flour')) {
-        product = "flour";
-    } else if (ingredientArr.includes("sugar")) {
-        if (ingredientArr.includes('icing')
-            || ingredientArr.includes("confectioners")
-            || ingredientArr.includes("confectioners’")
-            || ingredientArr.includes("confectioners'")
-            || ingredientArr.includes("powder")
-            || ingredientArr.includes("powdered")) {
-            product = "icing sugar"
-        } else if (ingredientArr.includes("brown")) {
-            product = "brown sugar";
-        } else {
-            product = "sugar";
-        }
-    } else {
-        return false;
-    }
-    console.log(product + " is product")
-    return product;
-}
+    let firstMatch = [];
+    let finalMatch = [];
+    let ingredientNameArr = [];
+    let nameOfIngredient;
 
+    try {
+        for (let i = indexOfContainer + 1; i < ingredientArr.length; i++) {
+            firstMatch = await Ingredient.find({ name: ingredientArr[i] });
+            console.log(firstMatch + " is a first match")
+            if (firstMatch.length > 0) {
+                console.log(firstMatch + " is a first match the ingredient name with database");
+                nameOfIngredient = firstMatch[0].name;  // like nameOfIngredient = sugar
+                // get a specification for the ingredient
+                let name = nameOfIngredient;
+                ingredientNameArr.push(nameOfIngredient);
+                for (let j = i - 1; j > indexOfContainer; j--) {
+                    ingredientNameArr.unshift(ingredientArr[j]);
+                    console.log(ingredientNameArr);
+                    name = ingredientArr[j] + " " + name;
+                    console.log(name + " is a name")
+                    finalMatch = await Ingredient.find({ name: name });
+                    if (finalMatch.length > 0) {
+                        console.log(finalMatch + " is a next match, we went to the left");
+                        return nameOfIngredient = finalMatch[0].name; // like nameOfIngredient = brown sugar
+                    }
+                }
+                for (let j = i + 1; j < ingredientArr.length; j++) {
+                    ingredientNameArr.unshift(ingredientArr[j]);
+                    console.log(ingredientNameArr);
+                    name += " " + ingredientArr[j];
+                    finalMatch = await Ingredient.find({ name: name });
+                    if (finalMatch.length > 0) {
+                        console.log(finalMatch + " is a next match, we went to the right");
+                        return nameOfIngredient = finalMatch[0].name; // like nameOfIngredient = brown sugar
+                    }
+                }
+            } else if (firstMatch.length === 0) {
+                console.log("checking here")
+                let name = ingredientArr[i];
+                console.log(name + " is a name")
+                for (let k = i + 1; k < ingredientArr.length; k++) {
+                    name += " " + ingredientArr[k]
+                    console.log(name)
+                    finalMatch = await Ingredient.find({ name: name });
+                    if (finalMatch.length > 0) {
+                        nameOfIngredient = finalMatch[0].name;
+                    }
+                }
+            }
+        }
+    } catch (err) {
+        console.log(err);
+    }
+
+    console.log(nameOfIngredient + " is nameOfIngredient")
+    return nameOfIngredient;
+}
 module.exports = { handleMessage };
 
