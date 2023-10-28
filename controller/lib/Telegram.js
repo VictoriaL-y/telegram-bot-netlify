@@ -219,20 +219,17 @@ async function getConvertedRecipe(messageText) {
                     } else {
                         amount = parseInt(amount[0]) / parseInt(amount[2]);
                     }
-
-                    newWeight = amount * result.cup / factor;
-                    console.log(newWeight + " is a converted weight for " + nameOfIngredient);
-
                 } else if (indexOfContainer === 2) {
                     let amountFract = ingredientArr[1];
                     oldWeight = amount + " " + amountFract;
                     amount = parseInt(amount) + parseInt(amountFract[0]) / parseInt(amountFract[2]);
-                    newWeight = amount * result.cup / factor;
-                    console.log(newWeight + " is a convertedWeight for " + nameOfIngredient);
                 }
-
+                newWeight = amount * result.cup / factor;
+                newWeight = Math.round(newWeight * 10) / 10;
+                console.log(newWeight + " is a converted weight for " + nameOfIngredient);
+                
                 const convertedIngredient = ingredientArrWithSigns.join(' ')
-                    .replace(oldWeight, Math.round(newWeight * 10) / 10)
+                    .replace(oldWeight, newWeight)
                     .replace(measurementContainer, "gr");
                 recipeInGramsArr.push(convertedIngredient);
                 console.log(recipeInGramsArr);
@@ -278,7 +275,6 @@ async function getProductName(ingredientArr, indexOfContainer) {
     try {
         for (let i = indexOfContainer + 1; i < ingredientArr.length; i++) {
             firstMatch = await Ingredient.find({ name: ingredientArr[i] });
-            console.log(firstMatch + " is a first match")
             if (firstMatch.length > 0) {
                 console.log(firstMatch + " is a first match the ingredient name with database");
                 nameOfIngredient = firstMatch[0].name;  // like nameOfIngredient = sugar
@@ -307,12 +303,11 @@ async function getProductName(ingredientArr, indexOfContainer) {
                     }
                 }
             } else if (firstMatch.length === 0) {
-                console.log("checking here")
+                console.log("checking here, there is no firstmatch")
                 let name = ingredientArr[i];
-                console.log(name + " is a name")
                 for (let k = i + 1; k < ingredientArr.length; k++) {
                     name += " " + ingredientArr[k]
-                    console.log(name)
+                    console.log(name + " is a name");
                     finalMatch = await Ingredient.find({ name: name });
                     if (finalMatch.length > 0) {
                         nameOfIngredient = finalMatch[0].name;
