@@ -1,11 +1,11 @@
-const sendMessage = require("../../controller/index");
+const { handleMessage } = require('../../controller/lib/Telegram');
 
-exports.handler = async (event) => {
+exports.handler = async (req) => {
+    const { body } = req;
+    if (body) {
+        const messageObj = body.message;
+        await handleMessage(messageObj);
+    }
+    return;
 
-    const { message } = JSON.parse(event.body);
-    await sendMessage(message.chat.id, "I got your message!");
-    return { statusCode: 200 };
-};
-
-
-
+}
