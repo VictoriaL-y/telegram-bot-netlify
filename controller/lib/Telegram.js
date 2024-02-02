@@ -2,7 +2,7 @@ const { axiosInstance } = require("./axios");
 const Ingredient = require("../../models/ingredient")
 
 function sendMessage(messageObj, messageText) {
-    return axiosInstance.post("sendMessage", {
+    return axiosInstance.get("sendMessage", {
         chat_id: messageObj.chat.id,
         text: messageText,
     });
