@@ -6,6 +6,7 @@ exports.handler = async (req, method) => {
         const messageObj = body.message;
         await handleMessage(messageObj);
     }
-    return await req;
+
+    return { statusCode: 200 };
 
 }
