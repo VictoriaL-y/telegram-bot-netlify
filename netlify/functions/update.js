@@ -3,7 +3,8 @@ const { handleMessage } = require('../../controller/lib/Telegram');
 exports.handler = async (req, method) => {
     const { body } = req;
     if (body) {
-        const messageObj = JSON.parse(body.message);
+        const messageObj = JSON.parse(body)
+        console.log(messageObj);
         await handleMessage(messageObj);
     }
 
