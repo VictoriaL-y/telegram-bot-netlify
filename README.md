@@ -1,10 +1,10 @@
-# Telegram Bot project documentation
+# Telegram Bot (Netlify serverless functions version) project documentation
 
 ## Preface
 
 This project is a Telegram Bot project, created with the purpose to allow all the users to convert ingredients quantity from US measurements to EU.
 
-The bot can be accesses here: **https://t.me/ingredients_converter_bot**
+The bot was deployed on Netlify and can be accessed here: **https://t.me/ingredients_converter_bot**
 
 ## Details
 
