@@ -1,15 +1,13 @@
 const { handleMessage } = require('../../controller/lib/Telegram');
 
-exports.handler = async (req, method) => {
+exports.handler = async e => {
     try {
-        if (req) {
-            const messageObj = JSON.parse(req).message;
-            console.log(messageObj);
-            console.log(messageObj.text);
-            console.log(messageObj.chat.id)
-            await handleMessage(messageObj);
-            return { statusCode: 200, body: "" }
-        }
+        const messageObj = JSON.parse(e.body).message;
+        console.log(messageObj);
+        console.log(messageObj.text);
+        console.log(messageObj.chat.id)
+        await handleMessage(messageObj);
+        return { statusCode: 200, body: "" }
     } catch (e) {
         console.error("error in handler:", e)
         return { statusCode: 400, body: e }
