@@ -30,11 +30,11 @@ To install Node.js module to interact with the official Telegram Bot API
 
 ### Dotenv
 
-To install the Dotenv module that loads environment variables from a .env file into process.env
+To install the Dotenv module that loads environment variables
 
 `npm install dotenv`
 
-The .env file should contain TELEGRAM_TOKEN, MONGODB_USER and MONGODB_PASSWORD
+It's also necessary to set on Netlify the following environment variables: TELEGRAM_TOKEN, MONGODB_USER and MONGODB_PASSWORD
 
 ### Axios
 
@@ -42,21 +42,13 @@ To install a promise based HTTP client for the browser and node.js
 
 `npm i axios express`
 
-### ngrok
-
-To install a reverse proxy that creates a secure tunnel from a public endpoint to a locally running web service
-
-Download ngrok from https://ngrok.com/
-
-`mv ngrok /usr/local/bin`
-`ngrok authtoken “YOUR TOKEN”`
-`ngrok http 4040`
-
 ### Set WebHook
 
 Create a get request on postman https://www.postman.com/
 
-https://api.telegram.org/bot{TELEGRAM_TOKEN}/setWebhook?url={YOUR_NGROK_ADDRESS}
+`curl -F "url=https://<netlify URL>.netlify.app/.netlify/functions/update" https://api.telegram.org/bot{TELEGRAM_TOKEN}/setWebhook`
+
+where `<netlify URL>` is the Netlify's site name
 
 ### MongoDB
 
