@@ -2,10 +2,10 @@ const { axiosInstance } = require("./axios");
 const connectMongoDB = require('../../src/index');
 const Ingredient = require("../../models/ingredient")
 
-function sendMessage(messageObj, messageText) {
+async function sendMessage(messageObj, messageText) {
     console.log(messageText)
     console.log(messageObj)
-    return axiosInstance.get("sendMessage", {
+    return await axiosInstance.get("sendMessage", {
         chat_id: messageObj.chat.id,
         text: messageText,
     });
@@ -82,8 +82,8 @@ async function handleMessage(messageObj) {
     }
 }
 
-function getAllIngredients(messageObj) {
-    Ingredient.find()
+async function getAllIngredients(messageObj) {
+    await Ingredient.find()
         .then((result) => {
             let ingredientsList = ""
             console.log(result.length + " is length and the array of all the ingredients is: " + result);
@@ -102,7 +102,7 @@ function getAllIngredients(messageObj) {
         });
 }
 
-function addIngredient(messageObj, messageText) {
+async function addIngredient(messageObj, messageText) {
 
     const ingredientArr = messageText.split(/\s/);
     const ingredientWeigth = ingredientArr[ingredientArr.length - 1];
@@ -112,7 +112,7 @@ function addIngredient(messageObj, messageText) {
         return sendMessage(messageObj,
             "Please try again, the weight is incorrect");
     }
-    Ingredient.findOne({ name: ingredientName })
+    await Ingredient.findOne({ name: ingredientName })
         .then((result) => {
             if (result) {
                 return sendMessage(
@@ -135,10 +135,10 @@ function addIngredient(messageObj, messageText) {
         });
 }
 
-function deleteIngredient(messageObj, messageText) {
+async function deleteIngredient(messageObj, messageText) {
     const ingredientName = messageText.substr(8);
 
-    Ingredient.findOneAndDelete({ name: ingredientName })
+    await Ingredient.findOneAndDelete({ name: ingredientName })
         .then((result) => {
             if (result) {
                 return sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully deleted!");
@@ -152,7 +152,7 @@ function deleteIngredient(messageObj, messageText) {
         })
 }
 
-function updateIngredient(messageObj, messageText) {
+async function updateIngredient(messageObj, messageText) {
     const ingredientArr = messageText.split(/\s/);
     const ingredientWeigth = ingredientArr[ingredientArr.length - 1];
     const ingredientName = messageText.replace("/edit ", "").replace(" " + ingredientWeigth, "");
@@ -161,7 +161,7 @@ function updateIngredient(messageObj, messageText) {
         return sendMessage(messageObj,
             "Please try again, the weight is incorrect");
     } else {
-        Ingredient.findOneAndUpdate({ name: ingredientName }, { $set: { cup: parseInt(ingredientWeigth) } })
+        await Ingredient.findOneAndUpdate({ name: ingredientName }, { $set: { cup: parseInt(ingredientWeigth) } })
             .then((result) => {
                 if (!result) {
                     return sendMessage(
