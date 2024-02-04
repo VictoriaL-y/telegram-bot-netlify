@@ -1,4 +1,5 @@
 const { axiosInstance } = require("./axios");
+const connectMongoDB = require('../../src/index');
 const Ingredient = require("../../models/ingredient")
 
 function sendMessage(messageObj, messageText) {
@@ -79,9 +80,9 @@ async function handleMessage(messageObj) {
     }
 }
 
-function getAllIngredients(messageObj) {
-    console.log(messageObj)
-    Ingredient.find()
+async function getAllIngredients(messageObj) {
+    await connectMongoDB();
+    await Ingredient.find()
         .then((result) => {
             let ingredientsList = ""
             console.log(result.length + " is length and the array of all the ingredients is: " + result);
