@@ -3,14 +3,16 @@ require("dotenv").config();
 
 // connect a conversion-table database with this project
 
-const connectMongoDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGODB_URI);
-        console.log("Connected to MongoDB");
-    } catch (error) {
-        console.log(error);
+setTimeout(function () {
+    const connectMongoDB = async () => {
+        try {
+            await mongoose.connect(process.env.MONGODB_URI);
+            console.log("Connected to MongoDB");
+        } catch (error) {
+            console.log(error);
+        }
     }
-}
+}, 60000);
 
 module.exports = connectMongoDB;
 
