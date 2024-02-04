@@ -80,6 +80,7 @@ async function handleMessage(messageObj) {
 }
 
 function getAllIngredients(messageObj) {
+    console.log(messageObj)
     Ingredient.find()
         .then((result) => {
             let ingredientsList = ""
