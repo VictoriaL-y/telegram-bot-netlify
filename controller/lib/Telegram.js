@@ -95,8 +95,10 @@ async function getAllIngredients(messageObj) {
                     ingredientsList += ingredient.name + "\n";
                 }
             }
+        })
+        .then(() => {
             return sendMessage(
-                messageObj, ingredientsList);
+                messageObj, ingredientsList)
         })
         .catch((err) => {
             console.log(err);
@@ -231,7 +233,7 @@ async function getConvertedRecipe(messageText) {
                 newWeight = amount * result.cup / factor;
                 newWeight = Math.round(newWeight * 10) / 10;
                 console.log(newWeight + " is a converted weight for " + nameOfIngredient);
-                
+
                 const convertedIngredient = ingredientArrWithSigns.join(' ')
                     .replace(oldWeight, newWeight)
                     .replace(measurementContainer, "gr");
