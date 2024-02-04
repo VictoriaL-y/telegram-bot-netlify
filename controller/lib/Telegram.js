@@ -82,8 +82,8 @@ async function handleMessage(messageObj) {
     }
 }
 
-async function getAllIngredients(messageObj) {
-    await Ingredient.find()
+function getAllIngredients(messageObj) {
+    Ingredient.find()
         .then((result) => {
             let ingredientsList = ""
             console.log(result.length + " is length and the array of all the ingredients is: " + result);
