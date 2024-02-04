@@ -83,7 +83,6 @@ async function handleMessage(messageObj) {
 }
 
 async function getAllIngredients(messageObj) {
-    await connectMongoDB();
     await Ingredient.find()
         .then((result) => {
             let ingredientsList = ""
@@ -95,8 +94,6 @@ async function getAllIngredients(messageObj) {
                     ingredientsList += ingredient.name + "\n";
                 }
             }
-        })
-        .then(() => {
             return sendMessage(
                 messageObj, ingredientsList)
         })
