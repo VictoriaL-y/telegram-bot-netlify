@@ -3,6 +3,8 @@ const connectMongoDB = require('../../src/index');
 const Ingredient = require("../../models/ingredient")
 
 function sendMessage(messageObj, messageText) {
+    console.log(messageText)
+    console.log(messageObj)
     return axiosInstance.get("sendMessage", {
         chat_id: messageObj.chat.id,
         text: messageText,
