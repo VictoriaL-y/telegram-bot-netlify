@@ -1,11 +1,10 @@
 const { axiosInstance } = require("./axios");
-const connectMongoDB = require('../../src/index');
 const Ingredient = require("../../models/ingredient")
 
-async function sendMessage(messageObj, messageText) {
+function sendMessage(messageObj, messageText) {
     console.log(messageText)
     console.log(messageObj)
-    return await axiosInstance.get("sendMessage", {
+    return axiosInstance.get("sendMessage", {
         chat_id: messageObj.chat.id,
         text: messageText,
     });
@@ -34,7 +33,7 @@ async function handleMessage(messageObj) {
                 );
             case "all":
                 // get all the ingredients from the database
-                getAllIngredients(messageObj);
+                await getAllIngredients(messageObj);
                 break;
             case "add":
                 // get a message how to add a new ingredient to the conversion table
@@ -43,7 +42,7 @@ async function handleMessage(messageObj) {
 
             case "add " + messageText.substr(5):
                 // add a new ingredient to the conversion table
-                addIngredient(messageObj, messageText);
+                await addIngredient(messageObj, messageText);
                 break;
 
             case "delete":
@@ -53,7 +52,7 @@ async function handleMessage(messageObj) {
 
             case "delete" + messageText.substr(7):
                 // delete an existing ingredient from the conversion table
-                deleteIngredient(messageObj, messageText);
+                await deleteIngredient(messageObj, messageText);
                 break;
 
             case "edit":
@@ -63,7 +62,7 @@ async function handleMessage(messageObj) {
 
             case "edit" + messageText.substr(5):
                 // add a new ingredient to the conversion table
-                updateIngredient(messageObj, messageText);
+                await updateIngredient(messageObj, messageText);
                 break;
             default:
                 return sendMessage(messageObj,
