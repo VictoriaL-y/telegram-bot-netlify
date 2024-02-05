@@ -33,7 +33,7 @@ async function handleMessage(messageObj) {
             case "all":
                 // get all the ingredients from the database
                 connectMongoDB();
-                getAllIngredients(messageObj);
+                await getAllIngredients(messageObj);
                 break;
             case "add":
                 // get a message how to add a new ingredient to the conversion table
