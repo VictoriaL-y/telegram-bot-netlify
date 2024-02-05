@@ -33,7 +33,7 @@ async function handleMessage(messageObj) {
                 );
             case "all":
                 // get all the ingredients from the database
-                await getAllIngredients(messageObj);
+                getAllIngredients(messageObj);
                 break;
             case "add":
                 // get a message how to add a new ingredient to the conversion table
@@ -42,7 +42,7 @@ async function handleMessage(messageObj) {
 
             case "add " + messageText.substr(5):
                 // add a new ingredient to the conversion table
-                await addIngredient(messageObj, messageText);
+                addIngredient(messageObj, messageText);
                 break;
 
             case "delete":
@@ -52,7 +52,7 @@ async function handleMessage(messageObj) {
 
             case "delete" + messageText.substr(7):
                 // delete an existing ingredient from the conversion table
-                await deleteIngredient(messageObj, messageText);
+                deleteIngredient(messageObj, messageText);
                 break;
 
             case "edit":
@@ -62,7 +62,7 @@ async function handleMessage(messageObj) {
 
             case "edit" + messageText.substr(5):
                 // add a new ingredient to the conversion table
-                await updateIngredient(messageObj, messageText);
+                updateIngredient(messageObj, messageText);
                 break;
             default:
                 return sendMessage(messageObj,
