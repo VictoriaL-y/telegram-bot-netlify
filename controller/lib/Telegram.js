@@ -115,29 +115,29 @@ async function addIngredient(messageObj, messageText) {
         return sendMessage(messageObj,
             "Please try again, the weight is incorrect");
     }
+    
     await Ingredient.findOne({ name: ingredientName })
         .then((result) => {
             if (result) {
                 return sendMessage(
                     messageObj, "This ingredient is already in the table.");
+            } else {
+                // save a new ingredient to the table
+                connectMongoDB();
+                const ingredient = new Ingredient({
+                    name: ingredientName,
+                    cup: parseInt(ingredientWeigth)
+                });
+            
+                ingredient.save()
+                    .then(() => {
+                        return sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully added!");
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    })
             }
-        })
-        .then(() => {
-            // save a new ingredient to the table
-            const ingredient = new Ingredient({
-                name: ingredientName,
-                cup: parseInt(ingredientWeigth)
-            });
-
-            ingredient.save()
-                .then(() => {
-                    return sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully added!");
-                })
-                .catch((err) => {
-                    console.log(err);
-                })
         });
-
 }
 
 async function deleteIngredient(messageObj, messageText) {
