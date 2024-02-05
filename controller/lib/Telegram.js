@@ -85,24 +85,24 @@ async function handleMessage(messageObj) {
 }
 
 async function getAllIngredients(messageObj) {
-        await Ingredient.find()
-            .then((result) => {
-                let ingredientsList = ""
-                console.log(result.length + " is length and the array of all the ingredients is: " + result);
-                for (let ingredient of result) {
-                    if (result.indexOf(ingredient) === result.length - 1) {
-                        ingredientsList += ingredient.name;
-                    } else {
-                        ingredientsList += ingredient.name + "\n";
-                    }
+    await Ingredient.find()
+        .then((result) => {
+            let ingredientsList = ""
+            console.log(result.length + " is length and the array of all the ingredients is: " + result);
+            for (let ingredient of result) {
+                if (result.indexOf(ingredient) === result.length - 1) {
+                    ingredientsList += ingredient.name;
+                } else {
+                    ingredientsList += ingredient.name + "\n";
                 }
-                console.log(typeof (ingredientsList))
-                return sendMessage(
-                    messageObj, ingredientsList);
-            })
-            .catch((err) => {
-                console.log(err);
-            })
+            }
+            console.log(typeof (ingredientsList))
+            return sendMessage(
+                messageObj, ingredientsList);
+        })
+        .catch((err) => {
+            console.log(err);
+        })
 }
 
 async function addIngredient(messageObj, messageText) {
@@ -122,20 +122,24 @@ async function addIngredient(messageObj, messageText) {
                     messageObj, "This ingredient is already in the table.");
             } else {
                 // save a new ingredient to the table
-                const ingredient = new Ingredient({
-                    name: ingredientName,
-                    cup: parseInt(ingredientWeigth)
-                });
-
-                ingredient.save()
-                    .then(() => {
-                        return sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully added!");
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    })
+                return addIngredientToDB(ingredientName, ingredientWeigth);
             }
         });
+}
+
+async function addIngredientToDB(ingredientName, ingredientWeigth) {
+    const ingredient = new Ingredient({
+        name: ingredientName,
+        cup: parseInt(ingredientWeigth)
+    });
+
+    ingredient.save()
+        .then(() => {
+            return sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully added!");
+        })
+        .catch((err) => {
+            console.log(err);
+        })
 }
 
 async function deleteIngredient(messageObj, messageText) {
