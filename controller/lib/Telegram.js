@@ -122,12 +122,12 @@ async function addIngredient(messageObj, messageText) {
                     messageObj, "This ingredient is already in the table.");
             } else {
                 // save a new ingredient to the table
-                return addIngredientToDB(ingredientName, ingredientWeigth);
+                return addIngredientToDB(messageObj, ingredientName, ingredientWeigth);
             }
         });
 }
 
-async function addIngredientToDB(ingredientName, ingredientWeigth) {
+async function addIngredientToDB(messageObj, ingredientName, ingredientWeigth) {
     const ingredient = new Ingredient({
         name: ingredientName,
         cup: parseInt(ingredientWeigth)
