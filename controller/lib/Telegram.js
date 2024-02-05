@@ -115,7 +115,7 @@ async function addIngredient(messageObj, messageText) {
         return sendMessage(messageObj,
             "Please try again, the weight is incorrect");
     }
-    
+
     await Ingredient.findOne({ name: ingredientName })
         .then((result) => {
             if (result) {
@@ -127,14 +127,14 @@ async function addIngredient(messageObj, messageText) {
                     name: ingredientName,
                     cup: parseInt(ingredientWeigth)
                 });
-            
-                ingredient.save()
-                    .then(() => {
-                        return Promise.resolve(sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully added!"));
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    })
+                try {
+                    ingredient.save();
+                    return sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully added!");
+                }
+                catch (err) {
+                    console.log(err);
+                };
+
             }
         });
 }
