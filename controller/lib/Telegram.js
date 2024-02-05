@@ -42,7 +42,8 @@ async function handleMessage(messageObj) {
 
             case "add " + messageText.substr(5):
                 // add a new ingredient to the conversion table
-                addIngredient(messageObj, messageText);
+                connectMongoDB();
+                await addIngredient(messageObj, messageText);
                 break;
 
             case "delete":
@@ -52,7 +53,8 @@ async function handleMessage(messageObj) {
 
             case "delete" + messageText.substr(7):
                 // delete an existing ingredient from the conversion table
-                deleteIngredient(messageObj, messageText);
+                connectMongoDB();
+                await deleteIngredient(messageObj, messageText);
                 break;
 
             case "edit":
@@ -62,7 +64,8 @@ async function handleMessage(messageObj) {
 
             case "edit" + messageText.substr(5):
                 // add a new ingredient to the conversion table
-                updateIngredient(messageObj, messageText);
+                connectMongoDB();
+                await updateIngredient(messageObj, messageText);
                 break;
             default:
                 return sendMessage(messageObj,
