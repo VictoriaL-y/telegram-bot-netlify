@@ -8,78 +8,76 @@ function sendMessage(messageObj, messageText) {
     });
 }
 
-setTimeout(
-    async function handleMessage(messageObj) {
-        const messageText = messageObj.text || "";
-        let areThereUnknownIngredients = false;
+async function handleMessage(messageObj) {
+    const messageText = messageObj.text || "";
+    let areThereUnknownIngredients = false;
 
-        if (!messageText) {
-            return sendMessage(messageObj, "I can't convert this");
-        } else if (messageText.charAt(0) === "/") {
-            const command = messageText.substr(1);
-            switch (command) {
-                case "start":
-                    // send a welcome message to the user
-                    return sendMessage(
-                        messageObj,
-                        "Hi! I'm a bot who can help you to convert ingredients quantity from US measurements to EU"
-                    );
-                case "help":
-                    // send an instruction message
-                    return sendMessage(
-                        messageObj,
-                        "Send me a list of ingredients to convert (tsp, tbsp, cup -> grams). It must be a text in column format.\n\nExample:\n1 cup salted butter softened\n1 cup granulated sugar\n1 cup light brown sugar packed\n2 teaspoons pure vanilla extract\n2 large eggs\n3 cups all-purpose flour\n1 teaspoon baking soda"
-                    );
-                case "all":
-                    // get all the ingredients from the database
-                    getAllIngredients(messageObj);
-                    break;
-                case "add":
-                    // get a message how to add a new ingredient to the conversion table
-                    return sendMessage(messageObj,
-                        "Which ingredient do you want to add to my table? How many grams of it are in a US cup? Please write it in the following format:\n\n/add name weight");
+    if (!messageText) {
+        return sendMessage(messageObj, "I can't convert this");
+    } else if (messageText.charAt(0) === "/") {
+        const command = messageText.substr(1);
+        switch (command) {
+            case "start":
+                // send a welcome message to the user
+                return sendMessage(
+                    messageObj,
+                    "Hi! I'm a bot who can help you to convert ingredients quantity from US measurements to EU"
+                );
+            case "help":
+                // send an instruction message
+                return sendMessage(
+                    messageObj,
+                    "Send me a list of ingredients to convert (tsp, tbsp, cup -> grams). It must be a text in column format.\n\nExample:\n1 cup salted butter softened\n1 cup granulated sugar\n1 cup light brown sugar packed\n2 teaspoons pure vanilla extract\n2 large eggs\n3 cups all-purpose flour\n1 teaspoon baking soda"
+                );
+            case "all":
+                // get all the ingredients from the database
+                getAllIngredients(messageObj);
+                break;
+            case "add":
+                // get a message how to add a new ingredient to the conversion table
+                return sendMessage(messageObj,
+                    "Which ingredient do you want to add to my table? How many grams of it are in a US cup? Please write it in the following format:\n\n/add name weight");
 
-                case "add " + messageText.substr(5):
-                    // add a new ingredient to the conversion table
-                    addIngredient(messageObj, messageText);
-                    break;
+            case "add " + messageText.substr(5):
+                // add a new ingredient to the conversion table
+                addIngredient(messageObj, messageText);
+                break;
 
-                case "delete":
-                    // get a message how to delete an existing ingredient from the conversion table
-                    return sendMessage(messageObj,
-                        "Which ingredient do you want to delete from my table? Please write it in the following format:\n\n/delete name");
+            case "delete":
+                // get a message how to delete an existing ingredient from the conversion table
+                return sendMessage(messageObj,
+                    "Which ingredient do you want to delete from my table? Please write it in the following format:\n\n/delete name");
 
-                case "delete" + messageText.substr(7):
-                    // delete an existing ingredient from the conversion table
-                    deleteIngredient(messageObj, messageText);
-                    break;
+            case "delete" + messageText.substr(7):
+                // delete an existing ingredient from the conversion table
+                deleteIngredient(messageObj, messageText);
+                break;
 
-                case "edit":
-                    // get a message how to delete an existing ingredient from the conversion table
-                    return sendMessage(messageObj,
-                        "For which ingredient do you want to adjust the weight? Please write it in the following format:\n\n/edit name weight");
+            case "edit":
+                // get a message how to delete an existing ingredient from the conversion table
+                return sendMessage(messageObj,
+                    "For which ingredient do you want to adjust the weight? Please write it in the following format:\n\n/edit name weight");
 
-                case "edit" + messageText.substr(5):
-                    // add a new ingredient to the conversion table
-                    updateIngredient(messageObj, messageText);
-                    break;
-                default:
-                    return sendMessage(messageObj,
-                        "Hey, I don't know this command");
-            }
-        } else {
-            //convert a recipe and send it back to the user
-            const recipe = await getConvertedRecipe(messageText);
-            console.log("I got the converted recipe");
-
-            if (areThereUnknownIngredients) {
-                console.log("An unknown ingredient")
-                return sendMessage(messageObj, "I could't find some ingredinets in my table, you should add them and try converting again.\n\n" + recipe);
-            }
-            return sendMessage(messageObj, recipe);
+            case "edit" + messageText.substr(5):
+                // add a new ingredient to the conversion table
+                updateIngredient(messageObj, messageText);
+                break;
+            default:
+                return sendMessage(messageObj,
+                    "Hey, I don't know this command");
         }
+    } else {
+        //convert a recipe and send it back to the user
+        const recipe = await getConvertedRecipe(messageText);
+        console.log("I got the converted recipe");
+
+        if (areThereUnknownIngredients) {
+            console.log("An unknown ingredient")
+            return sendMessage(messageObj, "I could't find some ingredinets in my table, you should add them and try converting again.\n\n" + recipe);
+        }
+        return sendMessage(messageObj, recipe);
     }
-    , 1000)
+}
 
 async function getAllIngredients(messageObj) {
     await Ingredient.find()
