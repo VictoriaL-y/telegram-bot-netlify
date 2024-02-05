@@ -34,7 +34,7 @@ To install the Dotenv module that loads environment variables
 
 `npm install dotenv`
 
-It's also necessary to set on Netlify the following environment variables: TELEGRAM_TOKEN, MONGODB_USER and MONGODB_PASSWORD
+It's also necessary to set on Netlify the following environment variables: TELEGRAM_TOKEN and MONGODB_URI
 
 ### Axios
 
