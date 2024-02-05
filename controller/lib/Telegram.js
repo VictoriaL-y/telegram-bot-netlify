@@ -123,7 +123,6 @@ async function addIngredient(messageObj, messageText) {
                     messageObj, "This ingredient is already in the table.");
             } else {
                 // save a new ingredient to the table
-                connectMongoDB();
                 const ingredient = new Ingredient({
                     name: ingredientName,
                     cup: parseInt(ingredientWeigth)
@@ -131,7 +130,7 @@ async function addIngredient(messageObj, messageText) {
             
                 ingredient.save()
                     .then(() => {
-                        return sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully added!");
+                        return Promise.resolve(sendMessage(messageObj, "The ingredient " + ingredientName + " was successfully added!"));
                     })
                     .catch((err) => {
                         console.log(err);
