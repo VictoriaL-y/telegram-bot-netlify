@@ -91,8 +91,9 @@ async function getAllIngredients(messageObj) {
                     ingredientsList += ingredient.name + "\n";
                 }
             }
+            console.log(typeof(ingredientsList))
             return sendMessage(
-                messageObj, ingredientsList)
+                messageObj, "Hi!!")
         })
         .catch((err) => {
             console.log(err);
