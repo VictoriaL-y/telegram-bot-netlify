@@ -1,4 +1,5 @@
 const { axiosInstance } = require("./axios");
+require("dotenv").config();
 const Ingredient = require("../../models/ingredient")
 
 function sendMessage(messageObj, messageText) {
@@ -80,6 +81,7 @@ async function handleMessage(messageObj) {
 }
 
 async function getAllIngredients(messageObj) {
+    await mongoose.connect(process.env.MONGODB_URI);
     await Ingredient.find()
         .then((result) => {
             let ingredientsList = ""
