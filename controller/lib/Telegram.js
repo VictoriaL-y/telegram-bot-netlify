@@ -82,24 +82,26 @@ async function handleMessage(messageObj) {
 
 async function getAllIngredients(messageObj) {
     await connectMongoDB()
-    .then(Ingredient.find())
-        .then((result) => {
-            let ingredientsList = ""
-            console.log(result.length + " is length and the array of all the ingredients is: " + result);
-            for (let ingredient of result) {
-                if (result.indexOf(ingredient) === result.length - 1) {
-                    ingredientsList += ingredient.name;
-                } else {
-                    ingredientsList += ingredient.name + "\n";
+    setTimeout(
+        await Ingredient.find()
+            .then((result) => {
+                let ingredientsList = ""
+                console.log(result.length + " is length and the array of all the ingredients is: " + result);
+                for (let ingredient of result) {
+                    if (result.indexOf(ingredient) === result.length - 1) {
+                        ingredientsList += ingredient.name;
+                    } else {
+                        ingredientsList += ingredient.name + "\n";
+                    }
                 }
-            }
-            console.log(typeof(ingredientsList))
-            return sendMessage(
-                messageObj, ingredientsList);
-        })
-        .catch((err) => {
-            console.log(err);
-        });
+                console.log(typeof (ingredientsList))
+                return sendMessage(
+                    messageObj, ingredientsList);
+            })
+            .catch((err) => {
+                console.log(err);
+            })
+        , 1000);
 }
 
 async function addIngredient(messageObj, messageText) {
