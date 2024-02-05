@@ -32,6 +32,7 @@ async function handleMessage(messageObj) {
                 );
             case "all":
                 // get all the ingredients from the database
+                connectMongoDB();
                 getAllIngredients(messageObj);
                 break;
             case "add":
@@ -81,8 +82,6 @@ async function handleMessage(messageObj) {
 }
 
 async function getAllIngredients(messageObj) {
-    await connectMongoDB()
-    setTimeout(
         await Ingredient.find()
             .then((result) => {
                 let ingredientsList = ""
@@ -101,7 +100,6 @@ async function getAllIngredients(messageObj) {
             .catch((err) => {
                 console.log(err);
             })
-        , 1000);
 }
 
 async function addIngredient(messageObj, messageText) {
