@@ -81,8 +81,8 @@ async function handleMessage(messageObj) {
 }
 
 async function getAllIngredients(messageObj) {
-    await connectMongoDB();
-    await Ingredient.find()
+    await connectMongoDB()
+    .then(Ingredient.find())
         .then((result) => {
             let ingredientsList = ""
             console.log(result.length + " is length and the array of all the ingredients is: " + result);
@@ -95,7 +95,7 @@ async function getAllIngredients(messageObj) {
             }
             console.log(typeof(ingredientsList))
             return sendMessage(
-                messageObj, "Hi!!")
+                messageObj, ingredientsList);
         })
         .catch((err) => {
             console.log(err);
